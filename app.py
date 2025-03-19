@@ -34,6 +34,10 @@ selected_tickers = st.sidebar.multiselect(
     all_tickers,
     default=["AAPL"]  # Default selection
 )
+
+# Debug: Display selected tickers
+st.write(f"Selected Tickers: {selected_tickers}")
+
 start_date = st.sidebar.date_input("Start date", dt.date.today() - dt.timedelta(days=365))
 end_date = st.sidebar.date_input("End date", dt.date.today())
 
@@ -47,7 +51,6 @@ show_dividends = st.sidebar.checkbox("Show Dividends", value=True)
 show_growth_rates = st.sidebar.checkbox("Show Growth Rates", value=True)
 
 # Fetch stock data and dividends
-@st.cache_data  # Cache the data to improve performance
 def fetch_stock_data(ticker, start_date, end_date):
     """
     Fetch historical stock data and dividends for a given ticker and date range.
