@@ -20,15 +20,19 @@ if __name__ == "__main__":
 
     # Fetch the data
     data = fetch_stock_data(ticker, yesterday, tomorrow)
-    delta = tomorrow - yesterday
 
-    #check if todays data is available
-    if delta.days == 1:
-        print("Data for today is not available yet")
+  # Check if data is available
+    if data.empty:
+        print(f"No data available for {ticker} between {yesterday} and {today}.")
     else:
-        print("Data for today is available")
+        # Display the first few rows
+        print(data.head())
 
-    # Display the first few rows
-    print(data.head())
+        # Check if today's data is available
+        if data.index[-1].date() == today:
+            print("Today's data is available.")
+        else:
+            print("Today's data is not yet available.")
+
 
  
