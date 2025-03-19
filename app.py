@@ -63,73 +63,77 @@ def fetch_stock_data(ticker, start_date, end_date):
 if not selected_tickers:
     st.error("Please select at least one stock ticker.")
 else:
-    for ticker in selected_tickers:
-        st.header(f"Stock Data for {ticker}")
-        data, dividends = fetch_stock_data(ticker, start_date, end_date)
+    # Create columns for each ticker
+    columns = st.columns(len(selected_tickers))
 
-        # Check if data is valid
-        if data.empty:
-            st.error(f"No data available for {ticker} between {start_date} and {end_date}.")
-        else:
-            # Calculate historical growth rates
-            def calculate_historical_growth_rate(prices_or_dividends):
-                """
-                Calculate the historical growth rate (CAGR) for a given series of prices or dividends.
-                """
-                if len(prices_or_dividends) < 2:
-                    st.warning(f"Not enough data to calculate growth rate. Length: {len(prices_or_dividends)}")
-                    return 0.0
-                try:
-                    years = (prices_or_dividends.index[-1] - prices_or_dividends.index[0]).days / 365.25
-                    growth_rate = (prices_or_dividends.iloc[-1] / prices_or_dividends.iloc[0]) ** (1 / years) - 1
-                    return float(growth_rate)  # Ensure the result is a float
-                except Exception as e:
-                    st.error(f"Error calculating growth rate: {e}")
-                    return 0.0
+    for i, ticker in enumerate(selected_tickers):
+        with columns[i]:
+            st.header(f"Stock Data for {ticker}")
+            data, dividends = fetch_stock_data(ticker, start_date, end_date)
 
-            # Calculate growth rates only if the "Close" column exists
-            if "Close" in data.columns:
-                price_growth_rate = calculate_historical_growth_rate(data["Close"])
+            # Check if data is valid
+            if data.empty:
+                st.error(f"No data available for {ticker} between {start_date} and {end_date}.")
             else:
-                price_growth_rate = 0.0
-                st.error(f"No 'Close' price data available for {ticker}.")
+                # Calculate historical growth rates
+                def calculate_historical_growth_rate(prices_or_dividends):
+                    """
+                    Calculate the historical growth rate (CAGR) for a given series of prices or dividends.
+                    """
+                    if len(prices_or_dividends) < 2:
+                        st.warning(f"Not enough data to calculate growth rate. Length: {len(prices_or_dividends)}")
+                        return 0.0
+                    try:
+                        years = (prices_or_dividends.index[-1] - prices_or_dividends.index[0]).days / 365.25
+                        growth_rate = (prices_or_dividends.iloc[-1] / prices_or_dividends.iloc[0]) ** (1 / years) - 1
+                        return float(growth_rate)  # Ensure the result is a float
+                    except Exception as e:
+                        st.error(f"Error calculating growth rate: {e}")
+                        return 0.0
 
-            if not dividends.empty:
-                dividend_growth_rate = calculate_historical_growth_rate(dividends)
-            else:
-                dividend_growth_rate = 0.0
-                st.warning(f"No dividend data available for {ticker}.")
-
-            # Display the data
-            st.subheader(f"Stock Data for {ticker}")
-            st.write(data)
-
-            # Display growth rates
-            if show_growth_rates:
-                st.subheader("Historical Growth Rates")
-                if isinstance(price_growth_rate, (float, int)):
-                    st.write(f"Price Growth Rate: {price_growth_rate:.2%}")
+                # Calculate growth rates only if the "Close" column exists
+                if "Close" in data.columns:
+                    price_growth_rate = calculate_historical_growth_rate(data["Close"])
                 else:
-                    st.error(f"Invalid growth rate value: {price_growth_rate}")
+                    price_growth_rate = 0.0
+                    st.error(f"No 'Close' price data available for {ticker}.")
 
-                if isinstance(dividend_growth_rate, (float, int)):
-                    st.write(f"Dividend Growth Rate: {dividend_growth_rate:.2%}")
+                if not dividends.empty:
+                    dividend_growth_rate = calculate_historical_growth_rate(dividends)
                 else:
-                    st.error(f"Invalid growth rate value: {dividend_growth_rate}")
+                    dividend_growth_rate = 0.0
+                    st.warning(f"No dividend data available for {ticker}.")
 
-            # Plot the closing price
-            if "Close" in data.columns:
-                st.subheader(f"Closing Price for {ticker}")
-                st.line_chart(data["Close"])
+                # Display the data
+                st.subheader(f"Stock Data for {ticker}")
+                st.write(data)
 
-            # Plot the volume
-            if "Volume" in data.columns:
-                st.subheader(f"Volume for {ticker}")
-                st.bar_chart(data["Volume"])
-
-            # Plot dividends
-            if show_dividends and not dividends.empty:
-                st.subheader(f"Dividends for {ticker}")
-                st.line_chart(dividends)
+                # Display growth rates
                 if show_growth_rates:
-                    st.write(f"Dividend Growth Rate: {dividend_growth_rate:.2%}")
+                    st.subheader("Historical Growth Rates")
+                    if isinstance(price_growth_rate, (float, int)):
+                        st.write(f"Price Growth Rate: {price_growth_rate:.2%}")
+                    else:
+                        st.error(f"Invalid growth rate value: {price_growth_rate}")
+
+                    if isinstance(dividend_growth_rate, (float, int)):
+                        st.write(f"Dividend Growth Rate: {dividend_growth_rate:.2%}")
+                    else:
+                        st.error(f"Invalid growth rate value: {dividend_growth_rate}")
+
+                # Plot the closing price
+                if "Close" in data.columns:
+                    st.subheader(f"Closing Price for {ticker}")
+                    st.line_chart(data["Close"])
+
+                # Plot the volume
+                if "Volume" in data.columns:
+                    st.subheader(f"Volume for {ticker}")
+                    st.bar_chart(data["Volume"])
+
+                # Plot dividends
+                if show_dividends and not dividends.empty:
+                    st.subheader(f"Dividends for {ticker}")
+                    st.line_chart(dividends)
+                    if show_growth_rates:
+                        st.write(f"Dividend Growth Rate: {dividend_growth_rate:.2%}")
