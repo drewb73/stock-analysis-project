@@ -2,7 +2,7 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import datetime as dt
-import pytz  # For timezone handling
+import pytz  # For timezone handling in datetime objects
 
 # Title of the app
 st.title("Stock Data Analysis")
